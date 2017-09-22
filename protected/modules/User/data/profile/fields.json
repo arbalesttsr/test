@@ -1,0 +1,50 @@
+{
+  "a_primit": {
+    "fieldType": "dateField"
+  },
+  "locality_id": {
+    "fieldType": "dropDownList",
+    "refTable": "cl_locality",
+    "refColumn": "name"
+  },
+  "un_textfield": {
+    "fieldType": "textField"
+  },
+  "o_textarea": {
+    "fieldType": "textArea"
+  },
+  "o_data": {
+    "fieldType": "dateField"
+  },
+  "modules_id": {
+    "fieldType": "dropDownList",
+    "refTable": "sys_modules",
+    "refColumn": "name"
+  },
+  "un_int": {
+    "fieldType": "numberField"
+  },
+  "un_decimal": {
+    "fieldType": "numberField"
+  },
+  "un_c": {
+    "fieldType": "checkBox"
+  },
+  "document_action_id": {
+    "fieldType": "dropDownList",
+    "refTable": "sys_document_action",
+    "refColumn": "description"
+  },
+  "un_textarea": {
+    "fieldType": "textArea"
+  },
+  "un_checkbox": {
+    "fieldType": "checkBox"
+  },
+  "test": {
+    "fieldType": "textField"
+  },
+  "start_page": {
+    "fieldType": "textField"
+  }
+}

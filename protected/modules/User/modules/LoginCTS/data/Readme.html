@@ -1,0 +1,41 @@
+<h1>Modulul Login CTS</h1>
+
+<p>În sistemul ”Synapsis” există posibilitate de autentificare prin MPASS de la CTS.</p>
+
+
+<div class="block" id="view_description_integration">
+    <h1 class="title">Descriere Integrare</h1>
+    <p>Initial trebuie sa primim de la CTS un fisier <b>*.pfx </b> sau certificate pentru serviciul eXXXXXX
+        ex:(eApostila). </p>
+    <p>Dupa ce am primit <b>*.pfx</b> , exstragem cheia private si certificatul public cu extensia <b>*.cer</b></p>
+    <p>Extragem certificatul public cu extensia <b>*.cer</b> pentru ca sa-l adauge in MPass.</p>
+    <p>
+        <span style="background-color: #0088CC; border: 1px solid #002166;">
+            root@vmAppApostila: ~# openssl pkcs12 -in 2110_apostila_m-pass.pfx -clcerts -nokeys -out certificate.cer
+        </span>
+    </p>
+    <p><i>Dupa ce s-a extras acest certificate , trebuie de transmis la egov, ca ei sa-l adauge in MPass.</i></p>
+    <p>Extragem <b>private key</b></p>
+    <p>
+        <span style="background-color: #0088CC; border: 1px solid #002166;">
+            root@vmAppApostila: ~# openssl pkcs12 -in 2110_apostila_m-pass.pfx -nocerts  -out new_cert.key
+        </span>
+    </p><br/>
+    <p>
+        <span style="background-color: #0088CC; border: 1px solid #002166;">
+            root@vmAppApostila: ~# openssl rsa -in new_cert.key -out new_cert.decrypted.key
+        </span>
+    </p>
+    <p>Apoi copiem cheia si certificatul in <b>/etc/ssl/private/ </b> si <b>/etc/ssl/certs/</b></p>
+    <p>
+        <span style="background-color: #0088CC; border: 1px solid #002166;">
+            root@vmAppApostila: ~# cp new_cert.decrypted.key  /etc/ssl/private/
+        </span>
+    </p>
+    <p>
+        <span style="background-color: #0088CC; border: 1px solid #002166;">
+            root@vmAppApostila: ~# cp certificate.crt  /etc/ssl/certs/
+        </span>
+    </p>
+
+</div>

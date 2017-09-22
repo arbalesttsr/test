@@ -1,0 +1,409 @@
+<?php
+
+
+class InstallConfigureForm extends CFormModel
+{
+    public $restoreData = true;
+    public $deleteData;
+    public $yiiPath = AP_YII_PATH;
+    public $dbHost = 'localhost';
+    public $dbType;
+    public $port;
+    public $dbName;
+    public $dbUserName;
+    public $dbPassword;
+
+    public function rules()
+    {
+        return array(
+            array('yiiPath, dbType, dbHost, dbName, dbUserName', 'required'),
+            array('port', 'numerical', 'allowEmpty' => true, 'integerOnly' => true),
+            array('port', 'length', 'max' => 4, 'min' => 4),
+            array('dbPassword,', 'length', 'max' => 40),
+            array('dbPassword', 'checkDbConnection'),
+        );
+    }
+
+    public function checkDbConnection()
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                $this->checkDbConnectionMysql();
+                break;
+            case 'pgsql':
+                $this->checkDbConnectionPgsql();
+                break;
+            case 'mssql':
+                $this->checkDbConnectionMssql();
+                break;
+        }
+    }
+
+    public function checkDbConnectionMysql()
+    {
+        if (!$this->hasErrors()) {
+            try {
+                $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+            } catch (CDbException $e) {
+                new CHttpException(101, $e->getMessage());
+            }
+            try {
+                $connection->connectionStatus;
+            } catch (CDbException $e) {
+                $this->addError('dbPassword', Yii::t('InstallModule.core', 'Eroare la conectare cu BD'));
+            }
+        }
+    }
+
+    public function getDsn()
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                return strtr('mysql:host={host};port={port};dbname={db_name}', array(
+                    '{host}' => $this->dbHost,
+                    '{port}' => ($this->port == '') ? 3306 : $this->port,
+                    '{db_name}' => "",
+                ));
+                break;
+
+            case 'mssql':
+                return strtr('sqlsrv:Server={host};Database={db_name}', array(
+                    '{host}' => $this->dbHost,
+                    '{db_name}' => "",
+                ));
+                break;
+
+            case 'pgsql':
+                return strtr('pgsql:host={host};port={port};dbname=postgres', array(
+                    '{host}' => $this->dbHost,
+                    '{port}' => ($this->port == '') ? 5432 : $this->port,
+                    '{user}' => $this->dbUserName,
+                    '{db_name}' => "''",
+                    '{password}' => ($this->dbPassword == '') ? "''" : $this->dbPassword,
+                ));
+                break;
+        }
+    }
+
+    public function checkDbConnectionPgsql()
+    {
+        if (!$this->hasErrors()) {
+            try {
+                $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+            } catch (CDbException $e) {
+                new CHttpException(101, $e->getMessage());
+            }
+            try {
+                $connection->connectionStatus;
+            } catch (CDbException $e) {
+                $this->addError('dbPassword', Yii::t('InstallModule.core', 'Eroare la conectare cu BD'));
+            }
+        }
+    }
+
+    public function checkDbConnectionMssql()
+    {
+        if (!$this->hasErrors()) {
+            try {
+                $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+            } catch (CDbException $e) {
+                new CHttpException(101, $e->getMessage());
+            }
+            try {
+                $connection->clientVersion;
+            } catch (CDbException $e) {
+                $this->addError('dbPassword', Yii::t('InstallModule.core', 'Eroare la conectare cu BD'));
+            }
+        }
+    }
+
+    public function createDb($nameDb)
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                return ($this->createDbMysql($nameDb) == true) ? true : false;
+                break;
+            case 'pgsql':
+                return ($this->createDbPgsql($nameDb) == true) ? true : false;
+                break;
+            case 'mssql':
+                return ($this->createDbMssql($nameDb) == true) ? true : false;
+                break;
+        }
+    }
+
+    protected function createDbMysql($nameDb)
+    {
+        try {
+            $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        if ($connection) {
+            $sqlStatement = "show databases";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+            $reader = $command->query();
+            foreach ($reader as $row) {
+                if ($nameDb === $row['Database']) {
+                    return false;
+                }
+            }
+            $sqlStatement = "create database $nameDb";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+        }
+        return true;
+    }
+
+    protected function createDbPgsql($nameDb)
+    {
+        try {
+            $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        if ($connection) {
+            $sqlStatement = "SELECT datname FROM pg_database WHERE datistemplate = false;";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+            $reader = $command->query();
+            foreach ($reader as $row) {
+                if ($nameDb === $row['datname']) {
+                    return false;
+                }
+            }
+            $sqlStatement = "create database $nameDb";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+        }
+        return true;
+    }
+
+    protected function createDbMssql($nameDb)
+    {
+        try {
+            $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        if ($connection) {
+            $sqlStatement = "SELECT name FROM master..sysdatabases";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+            $reader = $command->query();
+            foreach ($reader as $row) {
+                if ($nameDb === $row['name']) {
+                    return false;
+                }
+            }
+            $sqlStatement = "CREATE DATABASE $nameDb";
+            $command = $connection->createCommand($sqlStatement);
+            $command->execute();
+        }
+        return true;
+    }
+
+    public function dropDb()
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                $this->dropDbMysql();
+                break;
+            case 'pgsql':
+                $this->dropDbPgsql();
+                break;
+            case 'mssql':
+                $this->dropDbMysql();
+                break;
+        }
+    }
+
+    public function dropDbMysql()
+    {
+        try {
+            $connection = new CDbConnection($this->getDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        $sqlStatement = "DROP Database $this->dbName;create database $this->dbName";
+        $connection->createCommand($sqlStatement)->execute();
+    }
+
+    public function dropDbPgsql()
+    {
+        /*$connection = pg_connect($this->getDsn());
+        $version = pg_version($connection);
+        $sql = "update pg_database set datallowconn = 'false' where datname ='". $this->dbName."';";
+        pg_exec($connection, $sql);
+        $version = floatval($version['server']);
+        if ($version>=9.2){
+            $sql = "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname ='". $this->dbName."';";
+            pg_exec($connection, $sql);
+        }else{
+             $sql = "SELECT pg_terminate_backend(procpid) FROM pg_stat_activity WHERE datname = '". $this->dbName."';";
+             pg_exec($connection, $sql);
+        }
+        pg_exec($connection, "DROP DATABASE $this->dbName;");
+        pg_exec($connection, "CREATE DATABASE $this->dbName;");
+        */
+        $connection = new CDbConnection($this->getNewDsn(), $this->dbUserName, $this->dbPassword);
+        $connection->charset = 'utf8';
+        $connection->active = true;
+        $sql = "drop schema public cascade;";
+        $connection->createCommand($sql)->execute();
+        $sql = "create schema public;";
+        $connection->createCommand($sql)->execute();
+    }
+
+    public function getNewDsn()
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                return strtr('mysql:host={host};port={port};dbname={db_name}', array(
+                    '{host}' => $this->dbHost,
+                    '{port}' => ($this->port == '') ? 3306 : $this->port,
+                    '{db_name}' => $this->dbName,
+                ));
+                break;
+
+            case 'mssql':
+                return strtr('sqlsrv:Server={host};Database={db_name}', array(
+                    '{host}' => $this->dbHost,
+                    '{db_name}' => $this->dbName,
+                ));
+                break;
+
+            case 'pgsql':
+                return strtr('pgsql:host={host};port={port};dbname={db_name}', array(
+                    '{host}' => $this->dbHost,
+                    '{port}' => ($this->port == '') ? 5432 : $this->port,
+                    '{user}' => $this->dbUserName,
+                    '{db_name}' => $this->dbName,
+                    '{password}' => ($this->dbPassword == '') ? "''" : $this->dbPassword,
+                ));
+                break;
+        }
+    }
+
+    public function writeConnectionSettings()
+    {
+        $path = Yii::getPathOfAlias('webroot') . "/index.php";
+        $content = file_get_contents($path);
+
+        $dbHost = 'define("AP_DB_URL", "' . $this->dbHost . '");';
+        $dbName = 'define("AP_DB_NAME", "' . $this->dbName . '");';
+        $dbUserName = 'define("AP_DB_USER", "' . $this->dbUserName . '");';
+        $dbPassword = 'define("AP_DB_PASS", "' . $this->dbPassword . '");';
+        $yiiPath = 'define("AP_YII_PATH", "' . $this->yiiPath . '");';
+
+        $pattern1 = "/define\(\"AP_DB_URL.*?\"\);/";
+        $pattern2 = "/define\(\"AP_DB_NAME.*?\"\);/";
+        $pattern3 = "/define\(\"AP_DB_USER.*?\"\);/";
+        $pattern4 = "/define\(\"AP_DB_PASS.*?\"\);/";
+        $pattern5 = "/define\(\"AP_YII_PATH.*?\"\);/";
+
+        $content = preg_replace($pattern1, $dbHost, $content);
+        $content = preg_replace($pattern2, $dbName, $content);
+        $content = preg_replace($pattern3, $dbUserName, $content);
+        $content = preg_replace($pattern4, $dbPassword, $content);
+        $content = preg_replace($pattern5, $yiiPath, $content);
+
+        file_put_contents($path, $content);
+    }
+
+    public function oweriteMainFile($type, $port = null)
+    {
+        require_once Yii::getPathOfAlias('application.modules.install.config.dbconfig') . '.php';
+        $main = Yii::getPathOfAlias('application.config') . DIRECTORY_SEPARATOR . 'main.php';
+        $content = file_get_contents($main);
+        $pattern = "#\'db\'=>array\(.*?\),#isu";
+        $db = $dbConfig[$type];
+        if ($port != "") {
+            $patternPort = "/port=[0-9]{4}/";
+            $newPort = "port=" . $port;
+            $db = preg_replace($patternPort, $newPort, $db);
+            $content = preg_replace($pattern, $db, $content);
+        } else
+            $content = preg_replace($pattern, $db, $content);
+        file_put_contents($main, $content);
+    }
+
+    public function importSqlDump()
+    {
+        switch ($this->dbType) {
+            case 'mysql':
+                $this->importSqlDumpMysql();
+                break;
+            case 'pgsql':
+                $this->importSqlDumpPgsql();
+                break;
+            case 'mssql':
+                $this->importSqlDumpMssql();
+                break;
+        }
+    }
+
+    public function importSqlDumpMysql()
+    {
+        $sqlDumpPath = Yii::getPathOfAlias('application.data') . DIRECTORY_SEPARATOR . 'sys_modules_mysql.sql';
+        try {
+            $connection = new CDbConnection($this->getNewDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        $connection->charset = 'utf8';
+        $connection->active = true;
+        $que = file_get_contents($sqlDumpPath);
+        $connection->createCommand($que)->execute();
+    }
+
+    public function importSqlDumpPgsql()
+    {
+        $sqlDumpPath = Yii::getPathOfAlias('application.data') . DIRECTORY_SEPARATOR . 'sys_modules_pgsql.sql';
+        try {
+            $connection = new CDbConnection($this->getNewDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        $connection->charset = 'utf8';
+        $connection->active = true;
+        $que = file_get_contents($sqlDumpPath);
+        $querys = explode(";", $que);
+        try {
+            foreach ($querys as $query)
+                $connection->createCommand(trim($query))->execute();
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+    }
+
+    public function importSqlDumpMssql()
+    {
+        $sqlDumpPath = Yii::getPathOfAlias('application.data') . DIRECTORY_SEPARATOR . 'sys_modules_mssql.sql';
+        try {
+            $connection = new CDbConnection($this->getNewDsn(), $this->dbUserName, $this->dbPassword);
+        } catch (CDbException $e) {
+            new CHttpException(101, $e->getMessage());
+        }
+        $connection->charset = 'utf8';
+        $connection->active = true;
+        $que = file_get_contents($sqlDumpPath);
+        $connection->createCommand($que)->execute();
+    }
+
+    public function attributeLabels()
+    {
+        return array(
+            'restoreData' => Yii::t('InstallModule.core', 'Restaurare Date'),
+            'deleteData' => Yii::t('InstallModule.core', 'Stergere date'),
+            'yiiPath' => Yii::t('InstallModule.core', 'Adresa Framework'),
+            'dbType' => Yii::t('InstallModule.core', 'SGBD'),
+            'port' => Yii::t('InstallModule.core', 'Port'),
+            'dbHost' => Yii::t('InstallModule.core', 'Nume Host'),
+            'dbName' => Yii::t('InstallModule.core', 'Nume DB'),
+            'dbUserName' => Yii::t('InstallModule.core', 'Nume Utilizator'),
+            'dbPassword' => Yii::t('InstallModule.core', 'Parola'),
+        );
+    }
+}

@@ -1,0 +1,1 @@
+<?php $this->renderPartial('Documents.views.dashboards.tree_view');
