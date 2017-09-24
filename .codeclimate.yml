@@ -1,7 +1,8 @@
 engines:
   phpcodesniffer:
     enabled: true
-	
+  phpmd:
+    enabled: true
 ratings:
   paths:
   - "protected/modules/User/**.php"
