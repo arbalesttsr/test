@@ -6,3 +6,5 @@ engines:
   checks:
    Design/TooManyPublicMethods:
     enabled: false
+paths:
+- protected/modules/install/**
