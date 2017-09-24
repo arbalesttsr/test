@@ -6,4 +6,3 @@ engines:
 ratings:
   paths:
   - "protected/modules/User/**"
-  - "**.php"
