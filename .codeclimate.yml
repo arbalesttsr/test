@@ -1,8 +1,3 @@
 engines:
   phpcodesniffer:
     enabled: true
-  #phpmd:
-    #enabled: true
-ratings:
-  paths:
-  - "protected/modules/121313/**"
