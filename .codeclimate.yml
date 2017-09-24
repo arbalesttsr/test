@@ -1,7 +1,9 @@
 engines:
   phpcodesniffer:
     enabled: true
-
+phpmessdetector:
+	enabled: true
+	
 ratings:
   paths:
-  - "**.php"
+  - "protected/modules/User/**.php"
