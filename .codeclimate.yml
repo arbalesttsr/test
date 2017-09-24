@@ -3,6 +3,6 @@ engines:
   enabled: true
  phpmd:
   enabled: true
-   checks:
-    Design/TooManyPublicMethods:
-     enabled: false
+  checks:
+   Design/TooManyPublicMethods:
+    enabled: false
