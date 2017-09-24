@@ -1,1 +1,0 @@
-insert into "sys_default_errors"("code", "type", "error_code", "message", "create_user_id") values(500, 'PHP warning', '001', 'Ati accesat o adresa URL nevalida', 1);

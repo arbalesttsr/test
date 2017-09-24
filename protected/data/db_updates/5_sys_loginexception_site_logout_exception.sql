@@ -1,1 +1,0 @@
-insert into "sys_login_exception"("title", "action", "type", "create_user_id") values('Site Logout', 'site/logout', 1, 1);
