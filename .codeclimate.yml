@@ -1,12 +1,13 @@
 engines:
  phpcodesniffer:
   enabled: true
- phpmd:
-  enabled: true
-  checks:
-   Design/TooManyPublicMethods:
-    enabled: false
-#ratings:
- #paths:
- #- protected/modules/install/**
- #1
+ #phpmd:
+ # enabled: true
+  #checks:
+  # Design/TooManyPublicMethods:
+   # enabled: false
+ratings:
+ paths:
+ - protected/modules/install/**
+ exclude_paths:
+ - protected/modules/User/**
