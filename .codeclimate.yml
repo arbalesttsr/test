@@ -5,5 +5,5 @@ engines:
     #enabled: true
 ratings:
   paths:
-  - "protected/modules/User/**
+  - "protected/modules/User/**"
   - "**.php"
