@@ -4,6 +4,6 @@ engines:
  phpmd:
    enabled: true
 checks:
- Design/TooManyPublicMethods:
-   enabled: false
+Design/TooManyPublicMethods:
+enabled: false
    
