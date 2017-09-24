@@ -1,11 +1,11 @@
 engines:
- phpcodesniffer:
-  enabled: true
+	phpcodesniffer:
+		enabled: true
  #phpmd:
  # enabled: true
   #checks:
   # Design/TooManyPublicMethods:
    # enabled: false
 ratings:
- paths:
- - protected/modules/install/**/*
+	paths:
+		- protected/modules/install/**/*
