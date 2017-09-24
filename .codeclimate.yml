@@ -6,4 +6,3 @@ engines:
    checks:
     Design/TooManyPublicMethods:
      enabled: false
-   
