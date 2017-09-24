@@ -6,8 +6,4 @@ engines:
   #checks:
   # Design/TooManyPublicMethods:
    # enabled: false
-ratings:
- paths:
- - protected/modules/install/**
- exclude_paths:
- - protected/modules/User/**
+
