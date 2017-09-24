@@ -8,4 +8,4 @@ engines:
    # enabled: false
 ratings:
  paths:
- - "protected/modules/install/**/*"
+ - protected/modules/install/**/*
